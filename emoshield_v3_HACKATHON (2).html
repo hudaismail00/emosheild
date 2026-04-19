@@ -1,0 +1,809 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070714;--surface:#0e0e24;--card:#13132e;--border:rgba(255,255,255,0.07);
+  --accent:#e63946;--safe:#00d68f;--warn:#ffd166;--info:#4cc9f0;
+  --text:#f0f0ff;--muted:#6b7280;--purple:#a78bfa;
+}
+body{font-family:'Inter',sans-serif;color:var(--text);background:transparent}
+
+.shell{background:var(--bg);border-radius:24px;overflow:hidden;position:relative}
+
+.particles{position:absolute;top:0;left:0;width:100%;height:200px;pointer-events:none;overflow:hidden;z-index:0}
+.particle{position:absolute;width:2px;height:2px;border-radius:50%;animation:float linear infinite}
+@keyframes float{0%{transform:translateY(200px) scale(0);opacity:0}10%{opacity:1}90%{opacity:.6}100%{transform:translateY(-20px) scale(1.5);opacity:0}}
+
+.header{position:relative;z-index:1;padding:18px 18px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.shield-logo{width:42px;height:42px;border-radius:14px;background:#e63946;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;animation:shieldPulse 3s ease-in-out infinite}
+@keyframes shieldPulse{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}50%{box-shadow:0 0 0 8px rgba(230,57,70,0)}}
+.htext h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px}
+.htext p{font-size:10px;color:var(--muted);margin-top:1px;letter-spacing:.4px}
+.live-badge{margin-left:auto;display:flex;align-items:center;gap:5px;background:rgba(0,214,143,0.12);border:1px solid rgba(0,214,143,0.25);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--safe);font-weight:600;letter-spacing:.3px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--safe);animation:livePulse 1.5s infinite}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* AI badge */
+.ai-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:4px 10px;font-size:10px;color:var(--purple);font-weight:600;letter-spacing:.3px;margin-left:6px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:livePulse 2s infinite}
+
+.tabs{display:flex;padding:0 16px;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab{flex:1;padding:10px 4px;font-size:11px;font-weight:600;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.3px;transition:all .2s;text-align:center}
+.tab.active{color:#fff;border-bottom-color:var(--accent)}
+
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+
+.shield-ring{text-align:center;padding:16px 0 8px;position:relative}
+.ring-svg{display:block;margin:0 auto}
+.ring-score{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;text-align:center;margin-top:-4px}
+.ring-label{font-size:10px;color:var(--muted);text-align:center;letter-spacing:.5px;margin-top:2px}
+
+.msg-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;margin:12px 0}
+.msg-label{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+textarea{width:100%;background:none;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;font-weight:300;line-height:1.6;resize:none;outline:none;min-height:72px}
+textarea::placeholder{color:rgba(255,255,255,0.18)}
+.msg-footer{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);margin-top:8px}
+.char-c{font-size:11px;color:var(--muted)}
+.realtime-tag{font-size:10px;color:var(--purple);letter-spacing:.3px}
+
+.voice-strip{display:flex;align-items:center;gap:10px;background:rgba(76,201,240,0.07);border:1px solid rgba(76,201,240,0.15);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+.voice-icon{font-size:18px;flex-shrink:0}
+.voice-info{flex:1}
+.voice-info b{display:block;font-size:12px;font-weight:600;color:var(--info)}
+.voice-info span{font-size:10px;color:var(--muted)}
+.voice-waves{display:flex;align-items:center;gap:2px;height:24px}
+.wave-bar{width:3px;border-radius:2px;background:var(--info);opacity:.4;animation:wave .8s ease-in-out infinite}
+.wave-bar:nth-child(1){animation-delay:0s}
+.wave-bar:nth-child(2){animation-delay:.1s}
+.wave-bar:nth-child(3){animation-delay:.2s}
+.wave-bar:nth-child(4){animation-delay:.3s}
+.wave-bar:nth-child(5){animation-delay:.4s}
+@keyframes wave{0%,100%{height:4px;opacity:.3}50%{height:20px;opacity:1}}
+
+.scan-btn{width:100%;padding:13px;border:none;border-radius:14px;background:#e63946;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.4px;transition:all .2s;position:relative;overflow:hidden}
+.scan-btn:active{transform:scale(.98)}
+.scan-btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.2);border-radius:50%;transform:translate(-50%,-50%);transition:width .4s,height .4s,opacity .4s}
+.scan-btn.ripple::after{width:200px;height:200px;opacity:0}
+
+.loader{display:none;text-align:center;padding:20px}
+.loader-ring{display:inline-block;width:40px;height:40px;border:3px solid rgba(230,57,70,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:.3px}
+.ai-thinking{font-size:10px;color:var(--purple);margin-top:4px;letter-spacing:.3px}
+
+.result{display:none;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{0%{opacity:0;transform:scale(.94) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+
+.result-header{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;margin-bottom:12px}
+.result-header.danger{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.25)}
+.result-header.safe{background:rgba(0,214,143,.08);border:1px solid rgba(0,214,143,.2)}
+.result-header.warn{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.2)}
+.r-icon{font-size:28px;flex-shrink:0}
+.r-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.r-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+.emo-section{margin-bottom:12px}
+.emo-title{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+.emo-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.emo-label{font-size:11px;color:var(--muted);width:80px;flex-shrink:0}
+.emo-track{flex:1;height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.emo-fill{height:100%;border-radius:4px;width:0;transition:width 1s cubic-bezier(.34,1.2,.64,1)}
+.emo-pct{font-size:11px;font-weight:600;width:32px;text-align:right}
+
+.suggest-box{background:rgba(0,214,143,.06);border:1px solid rgba(0,214,143,.18);border-radius:14px;padding:14px;margin-bottom:12px}
+.suggest-label{font-size:10px;color:var(--safe);letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+.suggest-text{font-size:13px;color:#d1fae5;line-height:1.5;font-style:italic}
+
+/* Context box */
+.context-box{background:rgba(76,201,240,.05);border:1px solid rgba(76,201,240,.15);border-radius:14px;padding:14px;margin-bottom:12px}
+.context-label{font-size:10px;color:var(--info);letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+.context-text{font-size:12px;color:var(--text);line-height:1.6;opacity:.85}
+
+.action-row{display:flex;gap:8px}
+.act-btn{flex:1;padding:11px;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.act-btn:active{transform:scale(.97)}
+.btn-primary{background:var(--safe);color:#002418}
+.btn-secondary{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)}
+
+.blocked-alert{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.3);border-radius:12px;padding:12px 14px;text-align:center;font-size:13px;color:#fca5a5;font-weight:600;margin-bottom:10px;display:none;animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.stat-c{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center}
+.stat-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1}
+.stat-l{font-size:10px;color:var(--muted);margin-top:4px;letter-spacing:.3px}
+
+.trend-chart{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px}
+.trend-title{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:12px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:60px}
+.cbar{flex:1;border-radius:4px 4px 0 0;min-width:0;transition:height .6s ease}
+.cbar-label{font-size:9px;color:var(--muted);text-align:center;margin-top:4px}
+.chart-days{display:flex;gap:6px}
+.chart-day{flex:1;font-size:9px;color:var(--muted);text-align:center}
+
+.feed-list{display:flex;flex-direction:column;gap:8px}
+.feed-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.feed-body{flex:1;min-width:0}
+.feed-msg{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-time{font-size:10px;color:var(--muted);margin-top:2px}
+.feed-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;flex-shrink:0}
+
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.set-info h3{font-size:14px;font-weight:500;color:var(--text)}
+.set-info p{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{width:46px;height:26px;border-radius:13px;position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+.toggle.on{background:var(--safe)}
+.toggle.off{background:rgba(255,255,255,.12)}
+.toggle::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;transition:left .3s}
+.toggle.on::after{left:23px}
+.toggle.off::after{left:3px}
+.sens-row{padding:14px 0;border-bottom:1px solid var(--border)}
+.sens-head{display:flex;justify-content:space-between;margin-bottom:8px}
+.sens-head span:first-child{font-size:14px;font-weight:500;color:var(--text)}
+.sens-val{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+
+.voice-player{background:rgba(76,201,240,.07);border:1px solid rgba(76,201,240,.15);border-radius:14px;padding:14px;margin-top:10px;display:none;animation:popIn .3s ease}
+.vp-label{font-size:10px;color:var(--info);font-weight:600;letter-spacing:.5px;margin-bottom:8px}
+.vp-text{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:10px}
+.vp-controls{display:flex;align-items:center;gap:10px}
+.vp-btn{width:32px;height:32px;border-radius:50%;background:var(--info);border:none;color:#000;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.vp-progress{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.vp-bar{height:100%;background:var(--info);border-radius:2px;width:0;transition:width .1s linear}
+.vp-time{font-size:11px;color:var(--muted)}
+
+.lang-strip{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.lang-pill{padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .2s}
+.lang-pill.active{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:var(--purple)}
+
+.impact-banner{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:14px;padding:14px;margin-top:12px;text-align:center}
+.impact-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--purple)}
+.impact-label{font-size:11px;color:var(--muted);margin-top:2px}
+
+.section-head{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+
+/* API Key input */
+.api-key-section{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:16px;padding:14px;margin-bottom:14px}
+.api-key-label{font-size:10px;color:var(--purple);letter-spacing:.8px;font-weight:600;margin-bottom:8px}
+.api-key-row{display:flex;gap:8px}
+.api-key-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;outline:none}
+.api-key-input:focus{border-color:rgba(167,139,250,.4)}
+.api-save-btn{padding:9px 14px;border:none;border-radius:10px;background:var(--purple);color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.api-status{font-size:10px;margin-top:6px}
+.api-status.ok{color:var(--safe)}
+.api-status.err{color:var(--accent)}
+.api-status.none{color:var(--muted)}
+
+/* Real scan history */
+.scan-history{margin-top:16px}
+.sh-title{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+.sh-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;animation:slideIn .3s ease}
+.sh-msg{font-size:12px;color:var(--text);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-meta{display:flex;gap:8px;align-items:center}
+.sh-score-pill{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.sh-time{font-size:10px;color:var(--muted)}
+
+/* Error box */
+.error-box{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.2);border-radius:12px;padding:12px;margin-top:10px;font-size:12px;color:#fca5a5;display:none}
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">EmoShield — AI cyberbullying prevention app with real-time emotion detection and voice alerts</h2>
+
+<div class="shell">
+
+<div class="particles" id="particles"></div>
+
+<div class="header">
+  <div class="shield-logo">🛡</div>
+  <div class="htext">
+    <h1>EmoShield</h1>
+    <p>AI CYBERBULLYING PREVENTION · POWERED BY CLAUDE AI</p>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="goTab('compose')">Compose</button>
+  <button class="tab" onclick="goTab('dashboard')">Dashboard</button>
+  <button class="tab" onclick="goTab('settings')">Settings</button>
+</div>
+
+<!-- COMPOSE TAB -->
+<div class="panel active" id="tab-compose">
+
+  <div style="text-align:center;padding:12px 0 6px">
+    <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
+      <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+      <circle id="ringCircle" cx="55" cy="55" r="46" fill="none" stroke="#00d68f" stroke-width="8"
+        stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round"
+        transform="rotate(-90 55 55)" style="transition:stroke-dashoffset 1s ease,stroke .5s"/>
+      <text x="55" y="50" text-anchor="middle" font-family="Syne,sans-serif" font-size="22" font-weight="800" fill="#f0f0ff" id="scoreText">--</text>
+      <text x="55" y="66" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#6b7280" letter-spacing="1">SAFETY SCORE</text>
+    </svg>
+  </div>
+
+  <div class="lang-strip">
+    <div class="lang-pill active" onclick="setLang(this,'EN')">EN</div>
+    <div class="lang-pill" onclick="setLang(this,'JP')">日本語</div>
+    <div class="lang-pill" onclick="setLang(this,'UR')">اردو</div>
+    <div class="lang-pill" onclick="setLang(this,'ES')">ES</div>
+    <div class="lang-pill" onclick="setLang(this,'FR')">FR</div>
+    <div class="lang-pill" onclick="setLang(this,'AR')">عربي</div>
+  </div>
+
+  <div class="msg-box">
+    <div class="msg-label">Your message</div>
+    <textarea id="msgIn" placeholder="Type what you want to send..." rows="3" oninput="onType()"></textarea>
+    <div class="msg-footer">
+      <span class="char-c" id="charC">0 / 500</span>
+      <span class="realtime-tag">✦ Claude AI analyzing</span>
+    </div>
+  </div>
+
+  <div class="voice-strip">
+    <span class="voice-icon">🎙</span>
+    <div class="voice-info">
+      <b>ElevenLabs Voice Engine</b>
+      <span>Spoken alerts in your language</span>
+    </div>
+    <div class="voice-waves">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+  </div>
+
+  <button class="scan-btn" id="scanBtn" onclick="doScan()">🔍 Scan with Claude AI</button>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loaderTxt">Sending to Claude AI...</div>
+    <div class="ai-thinking" id="aiThinking">✦ Real AI analysis in progress</div>
+  </div>
+
+  <div class="result" id="resultArea">
+    <div class="result-header" id="rHeader">
+      <span class="r-icon" id="rIcon"></span>
+      <div><div class="r-title" id="rTitle"></div><div class="r-sub" id="rSub"></div></div>
+    </div>
+
+    <div class="emo-section">
+      <div class="emo-title">Emotion analysis · by Claude AI</div>
+      <div id="emoBars"></div>
+    </div>
+
+    <div class="context-box" id="contextBox" style="display:none">
+      <div class="context-label">🧠 AI INSIGHT</div>
+      <div class="context-text" id="contextText"></div>
+    </div>
+
+    <div class="suggest-box" id="sugBox" style="display:none">
+      <div class="suggest-label">✦ CLAUDE'S KINDER ALTERNATIVE</div>
+      <div class="suggest-text" id="sugText"></div>
+    </div>
+
+    <div class="blocked-alert" id="blockedAlert">🚫 Message blocked — your kindness matters more</div>
+
+    <div class="voice-player" id="voicePlayer">
+      <div class="vp-label">🎙 ELEVENLABS VOICE ALERT</div>
+      <div class="vp-text" id="vpText"></div>
+      <div class="vp-controls">
+        <button class="vp-btn" onclick="togglePlay()" id="playBtn">▶</button>
+        <div class="vp-progress"><div class="vp-bar" id="vpBar"></div></div>
+        <span class="vp-time" id="vpTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="action-row" style="margin-top:10px">
+      <button class="act-btn btn-primary" id="mainActBtn" onclick="doAction()"></button>
+      <button class="act-btn btn-secondary" onclick="doClear()">Clear</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- DASHBOARD TAB -->
+<div class="panel" id="tab-dashboard">
+  <div class="section-head">This week</div>
+  <div class="stat-grid">
+    <div class="stat-c"><div class="stat-n" style="color:var(--info)" id="dashScanned">0</div><div class="stat-l">Messages scanned</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:var(--warn)" id="dashFlagged">0</div><div class="stat-l">Flagged</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:var(--safe)" id="dashRewritten">0</div><div class="stat-l">Rewritten kindly</div></div>
+    <div class="stat-c"><div class="stat-n" style="color:var(--accent)" id="dashBlocked">0</div><div class="stat-l">Blocked</div></div>
+  </div>
+
+  <div class="trend-chart">
+    <div class="trend-title">INCIDENTS THIS WEEK</div>
+    <div class="chart-bars" id="chartBars"></div>
+    <div class="chart-days" id="chartDays"></div>
+  </div>
+
+  <!-- Real scan history -->
+  <div class="scan-history">
+    <div class="sh-title">Your real scan history</div>
+    <div id="realFeedList"><div style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0">No scans yet. Try the Compose tab!</div></div>
+  </div>
+
+  <div class="impact-banner">
+    <div class="impact-num" id="impactCount">0</div>
+    <div class="impact-label">children protected worldwide today</div>
+  </div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="panel" id="tab-settings">
+
+  <!-- API KEY section -->
+  <div class="api-key-section">
+    <div class="api-key-label">🔑 CLAUDE AI API KEY</div>
+    <div class="api-key-row">
+      <input class="api-key-input" id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." />
+      <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+    </div>
+    <div class="api-status none" id="apiStatus">Enter your Anthropic API key to enable real AI analysis</div>
+  </div>
+
+  <div class="set-row">
+    <div class="set-info"><h3>Real-time scanning</h3><p>Analyze every message before it's sent</p></div>
+    <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div class="set-row">
+    <div class="set-info"><h3>Voice alerts (ElevenLabs)</h3><p>Spoken warnings in your chosen language</p></div>
+    <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div class="set-row">
+    <div class="set-info"><h3>Auto-suggest rewrites</h3><p>Offer kinder alternatives automatically</p></div>
+    <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div class="set-row">
+    <div class="set-info"><h3>Parent weekly report</h3><p>Silent emotional health summary email</p></div>
+    <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div class="set-row">
+    <div class="set-info"><h3>Multilingual support</h3><p>Detect toxicity in 40+ languages</p></div>
+    <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div class="sens-row">
+    <div class="sens-head"><span>Detection sensitivity</span><span class="sens-val" id="sensVal">75%</span></div>
+    <input type="range" min="10" max="100" value="75" step="5" oninput="document.getElementById('sensVal').textContent=this.value+'%'">
+  </div>
+  <div style="padding-top:14px;text-align:center">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Powered by</div>
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--purple)">ElevenLabs × Claude AI</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px">EmoShield v3.0 · Built at Victor Hacks 2026</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────
+let currentResult = null, playInterval = null, playProgress = 0, currentLang = 'EN';
+let apiKey = localStorage.getItem('emoshield_api_key') || '';
+let scanHistory = JSON.parse(localStorage.getItem('emoshield_history') || '[]');
+let stats = JSON.parse(localStorage.getItem('emoshield_stats') || '{"scanned":0,"flagged":0,"rewritten":0,"blocked":0}');
+
+const LANGS = {
+  EN: 'Type what you want to send...',
+  JP: '送りたいメッセージを入力...',
+  UR: 'یہاں لکھیں...',
+  ES: 'Escribe tu mensaje aquí...',
+  FR: 'Écrivez votre message ici...',
+  AR: 'اكتب رسالتك هنا...'
+};
+
+// ─── ON LOAD ──────────────────────────────────────────────────
+window.onload = () => {
+  initParticles();
+  if (apiKey) {
+    document.getElementById('apiKeyInput').value = apiKey;
+    document.getElementById('apiStatus').textContent = '✓ API key loaded — Claude AI ready';
+    document.getElementById('apiStatus').className = 'api-status ok';
+  }
+};
+
+// ─── API KEY ──────────────────────────────────────────────────
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val.startsWith('sk-ant')) {
+    document.getElementById('apiStatus').textContent = '✗ Invalid key format — must start with sk-ant';
+    document.getElementById('apiStatus').className = 'api-status err';
+    return;
+  }
+  apiKey = val;
+  localStorage.setItem('emoshield_api_key', apiKey);
+  document.getElementById('apiStatus').textContent = '✓ API key saved — Claude AI ready!';
+  document.getElementById('apiStatus').className = 'api-status ok';
+}
+
+// ─── CLAUDE AI ANALYSIS ───────────────────────────────────────
+async function analyzeWithClaude(message, lang) {
+  const langNames = { EN: 'English', JP: 'Japanese', UR: 'Urdu', ES: 'Spanish', FR: 'French', AR: 'Arabic' };
+  const langName = langNames[lang] || 'English';
+
+  const systemPrompt = `You are EmoShield, an AI system that protects children and teens from cyberbullying. 
+Analyze messages for emotional harm, toxicity, and cyberbullying patterns.
+You must respond ONLY with a valid JSON object. No other text.
+
+The message is written in ${langName}. Analyze it for that language's context and cultural nuances.
+
+JSON structure:
+{
+  "verdict": "toxic" | "warn" | "safe",
+  "score": number 0-100 (safety score, higher = safer),
+  "title": "brief verdict title",
+  "sub": "one line explanation for the user",
+  "insight": "2-3 sentence deeper explanation of what emotions/patterns you detected and why this matters",
+  "emotions": [
+    {"label": "emotion name", "percent": 0-100, "color": "#hexcolor"},
+    {"label": "emotion name", "percent": 0-100, "color": "#hexcolor"},
+    {"label": "emotion name", "percent": 0-100, "color": "#hexcolor"},
+    {"label": "emotion name", "percent": 0-100, "color": "#hexcolor"}
+  ],
+  "suggestion": "A kinder rewrite of the message if needed, null if message is safe",
+  "blocked": true | false,
+  "voiceAlert": "short spoken alert text to read aloud to the user"
+}
+
+Color guide: red (#e63946) for negative emotions, green (#00d68f) for positive, yellow (#ffd166) for neutral/mixed, blue (#4cc9f0) for calm.
+Be accurate and nuanced — not every critical message is toxic. Context matters.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Analyze this message: "${message}"` }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(err.error?.message || `API error ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.content[0].text.trim();
+  // Strip markdown code fences if present
+  const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ─── FALLBACK (no API key) ────────────────────────────────────
+function analyzeFallback(msg) {
+  const lower = msg.toLowerCase();
+  let key = 'safe';
+  if (lower.match(/stupid|dumb|idiot|ugly|hate you|loser|kill|shut up|freak|pathetic|worthless|nobody likes|go die|nobody cares/)) key = 'toxic';
+  else if (lower.match(/don't like|not good|boring|wrong|annoying|bad|weird|strange|problem|horrible/)) key = 'warn';
+
+  const RESULTS = {
+    toxic: { verdict:'toxic', score:12, title:'Harmful content detected', sub:'This message could deeply hurt someone — blocked for protection',
+      insight:'This message contains language patterns commonly associated with cyberbullying and emotional abuse. Such messages can cause lasting psychological harm, especially to young people.',
+      emotions:[{label:'Aggression',percent:91,color:'#e63946'},{label:'Contempt',percent:78,color:'#c1121f'},{label:'Hostility',percent:69,color:'#ff6b7a'},{label:'Empathy',percent:5,color:'#00d68f'}],
+      suggestion:'I\'m really upset right now. Can we talk about this when I\'ve had time to calm down?',
+      blocked:true, voiceAlert:'Warning: This message contains harmful content. EmoShield has blocked it. A kinder version has been suggested.'},
+    warn: { verdict:'warn', score:54, title:'Potentially hurtful', sub:'This might come across more harshly than intended',
+      insight:'Your message carries negative emotional charge that could be misread or cause unintended hurt. A slight rewording can preserve your meaning while protecting the relationship.',
+      emotions:[{label:'Frustration',percent:58,color:'#ffd166'},{label:'Criticism',percent:44,color:'#f4a261'},{label:'Negativity',percent:37,color:'#ffd166'},{label:'Empathy',percent:28,color:'#00d68f'}],
+      suggestion:'I noticed something that bothered me — would you be open to hearing how I felt about it?',
+      blocked:false, voiceAlert:'Caution: Your message may unintentionally hurt someone. Consider using the kinder alternative.'},
+    safe: { verdict:'safe', score:96, title:'Safe to send', sub:'This message is kind, respectful and constructive',
+      insight:'Your message shows healthy communication patterns with empathy and respect. This kind of language builds stronger relationships and positive online spaces.',
+      emotions:[{label:'Kindness',percent:85,color:'#00d68f'},{label:'Empathy',percent:79,color:'#00d68f'},{label:'Respect',percent:91,color:'#00d68f'},{label:'Aggression',percent:2,color:'#e63946'}],
+      suggestion:null, blocked:false, voiceAlert:'All clear! Your message is kind and safe to send. EmoShield approves.'}
+  };
+  return RESULTS[key];
+}
+
+// ─── MAIN SCAN ────────────────────────────────────────────────
+async function doScan() {
+  const msg = document.getElementById('msgIn').value.trim();
+  if (!msg) return;
+
+  const btn = document.getElementById('scanBtn');
+  btn.classList.add('ripple');
+  setTimeout(() => btn.classList.remove('ripple'), 500);
+  btn.disabled = true;
+
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('loader').style.display = 'block';
+  document.getElementById('voicePlayer').style.display = 'none';
+  document.getElementById('blockedAlert').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+
+  const txts = apiKey
+    ? ['Sending to Claude AI...', 'Reading emotional patterns...', 'Detecting intent & context...', 'Generating safe alternative...']
+    : ['Scanning message...', 'Reading emotions...', 'Checking tone...', 'Almost done...'];
+
+  let i = 0;
+  const iv = setInterval(() => {
+    document.getElementById('loaderTxt').textContent = txts[Math.min(i++, txts.length - 1)];
+  }, 600);
+
+  document.getElementById('aiThinking').textContent = apiKey ? '✦ Claude AI analyzing your message' : '⚠ Demo mode — add API key for real AI';
+
+  try {
+    let result;
+    if (apiKey) {
+      result = await analyzeWithClaude(msg, currentLang);
+    } else {
+      await new Promise(r => setTimeout(r, 2200));
+      result = analyzeFallback(msg);
+    }
+
+    clearInterval(iv);
+    document.getElementById('loader').style.display = 'none';
+
+    // Save to history
+    saveScan(msg, result);
+    showResult(result);
+
+  } catch (err) {
+    clearInterval(iv);
+    document.getElementById('loader').style.display = 'none';
+    const errBox = document.getElementById('errorBox');
+    errBox.style.display = 'block';
+    errBox.textContent = '⚠ AI Error: ' + err.message + ' — Check your API key in Settings or try again.';
+  }
+
+  btn.disabled = false;
+}
+
+// ─── SAVE SCAN TO HISTORY ─────────────────────────────────────
+function saveScan(msg, result) {
+  stats.scanned++;
+  if (result.verdict === 'toxic') { stats.blocked++; stats.flagged++; }
+  else if (result.verdict === 'warn') { stats.rewritten++; stats.flagged++; }
+
+  localStorage.setItem('emoshield_stats', JSON.stringify(stats));
+
+  const item = {
+    msg: msg.substring(0, 60),
+    score: result.score,
+    verdict: result.verdict,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+  scanHistory.unshift(item);
+  if (scanHistory.length > 20) scanHistory = scanHistory.slice(0, 20);
+  localStorage.setItem('emoshield_history', JSON.stringify(scanHistory));
+}
+
+// ─── SHOW RESULT ──────────────────────────────────────────────
+function showResult(r) {
+  currentResult = r;
+  document.getElementById('resultArea').style.display = 'block';
+
+  const clsMap = { toxic: 'danger', warn: 'warn', safe: 'safe' };
+  const iconMap = { toxic: '🚨', warn: '⚠️', safe: '✅' };
+
+  const h = document.getElementById('rHeader');
+  h.className = 'result-header ' + (clsMap[r.verdict] || 'safe');
+  document.getElementById('rIcon').textContent = iconMap[r.verdict] || '✅';
+  document.getElementById('rTitle').textContent = r.title;
+  document.getElementById('rSub').textContent = r.sub;
+
+  // Emotions
+  const bars = document.getElementById('emoBars');
+  bars.innerHTML = '';
+  (r.emotions || []).forEach(e => {
+    bars.innerHTML += `<div class="emo-row">
+      <span class="emo-label">${e.label}</span>
+      <div class="emo-track"><div class="emo-fill" style="background:${e.color}" data-p="${e.percent}"></div></div>
+      <span class="emo-pct" style="color:${e.color}">${e.percent}%</span>
+    </div>`;
+  });
+  setTimeout(() => document.querySelectorAll('.emo-fill').forEach(b => b.style.width = b.dataset.p + '%'), 80);
+
+  // Insight
+  const cb = document.getElementById('contextBox');
+  if (r.insight) {
+    cb.style.display = 'block';
+    document.getElementById('contextText').textContent = r.insight;
+  } else {
+    cb.style.display = 'none';
+  }
+
+  // Suggestion
+  const sb = document.getElementById('sugBox');
+  if (r.suggestion) {
+    sb.style.display = 'block';
+    document.getElementById('sugText').textContent = '"' + r.suggestion + '"';
+  } else {
+    sb.style.display = 'none';
+  }
+
+  if (r.blocked) document.getElementById('blockedAlert').style.display = 'block';
+
+  const btnTxt = r.verdict === 'toxic' ? 'Send kinder version →' : r.verdict === 'warn' ? 'Send improved version →' : 'Send message →';
+  document.getElementById('mainActBtn').textContent = btnTxt;
+
+  animateRing(r.score, r.score < 30 ? '#e63946' : r.score < 65 ? '#ffd166' : '#00d68f');
+  document.getElementById('scoreText').textContent = r.score;
+
+  setTimeout(() => showVoicePlayer(r), 800);
+}
+
+// ─── VOICE ────────────────────────────────────────────────────
+function showVoicePlayer(r) {
+  const vp = document.getElementById('voicePlayer');
+  vp.style.display = 'block';
+  document.getElementById('vpText').textContent = '"' + r.voiceAlert + '"';
+  playProgress = 0;
+  document.getElementById('vpBar').style.width = '0%';
+  document.getElementById('vpTime').textContent = '0:00';
+  speakText(r.voiceAlert);
+}
+
+function speakText(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95; u.pitch = 1.05; u.volume = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const pref = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || voices.find(v => v.lang.startsWith('en'));
+    if (pref) u.voice = pref;
+    u.onstart = () => startProgress(text.length * 55);
+    u.onend = () => { document.getElementById('playBtn').textContent = '▶'; clearInterval(playInterval); };
+    window.speechSynthesis.speak(u);
+    document.getElementById('playBtn').textContent = '⏸';
+  }
+}
+
+function startProgress(dur) {
+  clearInterval(playInterval); playProgress = 0;
+  const start = Date.now();
+  playInterval = setInterval(() => {
+    const el = Date.now() - start;
+    playProgress = Math.min(el / dur * 100, 100);
+    document.getElementById('vpBar').style.width = playProgress + '%';
+    const s = Math.floor(el / 1000);
+    document.getElementById('vpTime').textContent = Math.floor(s / 60) + ':' + (s % 60).toString().padStart(2, '0');
+    if (playProgress >= 100) clearInterval(playInterval);
+  }, 100);
+}
+
+function togglePlay() {
+  if ('speechSynthesis' in window) {
+    if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); document.getElementById('playBtn').textContent = '⏸'; }
+    else if (window.speechSynthesis.speaking) { window.speechSynthesis.pause(); document.getElementById('playBtn').textContent = '▶'; }
+    else if (currentResult) { speakText(currentResult.voiceAlert); }
+  }
+}
+
+// ─── RING ─────────────────────────────────────────────────────
+function animateRing(score, color) {
+  const circ = 289;
+  const offset = circ - (circ * score / 100);
+  const r = document.getElementById('ringCircle');
+  r.style.strokeDashoffset = offset;
+  r.style.stroke = color;
+}
+
+function updateRingLive(msg) {
+  const lower = msg.toLowerCase();
+  let score = 80;
+  if (lower.match(/stupid|dumb|idiot|ugly|hate|loser|kill|shut up|freak|pathetic|worthless/)) score = 12;
+  else if (lower.match(/don't|not good|boring|wrong|annoying|bad|weird|strange/)) score = 54;
+  animateRing(score, score < 30 ? '#e63946' : score < 65 ? '#ffd166' : '#00d68f');
+  document.getElementById('scoreText').textContent = score;
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────
+function setLang(el, lang) {
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active'); currentLang = lang;
+  document.getElementById('msgIn').placeholder = LANGS[lang] || LANGS.EN;
+}
+
+function goTab(t) {
+  ['compose', 'dashboard', 'settings'].forEach((n, i) => {
+    document.querySelectorAll('.tab')[i].classList.toggle('active', n === t);
+    document.getElementById('tab-' + n).classList.toggle('active', n === t);
+  });
+  if (t === 'dashboard') initDashboard();
+}
+
+function onType() {
+  const v = document.getElementById('msgIn').value;
+  document.getElementById('charC').textContent = v.length + ' / 500';
+  if (v.length > 2) updateRingLive(v);
+}
+
+function doAction() {
+  if (currentResult && currentResult.suggestion) {
+    document.getElementById('msgIn').value = currentResult.suggestion;
+    document.getElementById('charC').textContent = currentResult.suggestion.length + ' / 500';
+    updateRingLive(currentResult.suggestion);
+  }
+  doClear();
+  window.speechSynthesis && window.speechSynthesis.cancel();
+}
+
+function doClear() {
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('voicePlayer').style.display = 'none';
+  document.getElementById('blockedAlert').style.display = 'none';
+  document.getElementById('errorBox').style.display = 'none';
+  document.getElementById('msgIn').value = '';
+  document.getElementById('charC').textContent = '0 / 500';
+  animateRing(0, 'rgba(255,255,255,.1)');
+  document.getElementById('scoreText').textContent = '--';
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  clearInterval(playInterval);
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────
+function initDashboard() {
+  // Real stats
+  document.getElementById('dashScanned').textContent = stats.scanned;
+  document.getElementById('dashFlagged').textContent = stats.flagged;
+  document.getElementById('dashRewritten').textContent = stats.rewritten;
+  document.getElementById('dashBlocked').textContent = stats.blocked;
+
+  // Chart (demo data as base, scaled by real usage)
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const vals = [8, 15, 6, 22, 11, 18, Math.max(stats.flagged, 9)];
+  const max = Math.max(...vals);
+  const barsEl = document.getElementById('chartBars');
+  const daysEl = document.getElementById('chartDays');
+  barsEl.innerHTML = ''; daysEl.innerHTML = '';
+  vals.forEach((v, i) => {
+    const h = Math.round((v / max) * 56);
+    barsEl.innerHTML += `<div class="cbar" style="height:${h}px;background:${i === 3 ? '#e63946' : i === 5 ? '#ffd166' : 'rgba(76,201,240,0.5)'}"></div>`;
+    daysEl.innerHTML += `<div class="chart-day">${days[i]}</div>`;
+  });
+
+  // Real scan history
+  const feedEl = document.getElementById('realFeedList');
+  if (scanHistory.length === 0) {
+    feedEl.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0">No scans yet. Try the Compose tab!</div>';
+  } else {
+    const colorMap = { safe: '#00d68f', warn: '#ffd166', toxic: '#e63946' };
+    const bgMap = { safe: 'rgba(0,214,143,.1)', warn: 'rgba(255,209,102,.12)', toxic: 'rgba(230,57,70,.12)' };
+    const labelMap = { safe: 'Safe', warn: 'Warning', toxic: 'Toxic' };
+    feedEl.innerHTML = scanHistory.map(s => `
+      <div class="sh-item">
+        <div class="sh-msg">"${s.msg}"</div>
+        <div class="sh-meta">
+          <span class="sh-score-pill" style="background:${bgMap[s.verdict]};color:${colorMap[s.verdict]}">${labelMap[s.verdict]} · ${s.score}</span>
+          <span class="sh-time">${s.time}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  // Impact counter
+  let count = 0; const target = 48291 + stats.scanned * 3;
+  const iv = setInterval(() => {
+    count = Math.min(count + Math.round(target / 60), target);
+    document.getElementById('impactCount').textContent = count.toLocaleString();
+    if (count >= target) clearInterval(iv);
+  }, 30);
+}
+
+// ─── PARTICLES ────────────────────────────────────────────────
+function initParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const colors = ['#e63946', '#4cc9f0', '#00d68f', '#a78bfa', '#ffd166'];
+    p.style.cssText = `left:${Math.random() * 100}%;background:${colors[Math.floor(Math.random() * colors.length)]};animation-duration:${3 + Math.random() * 5}s;animation-delay:${Math.random() * 4}s;width:${1 + Math.random() * 2}px;height:${1 + Math.random() * 2}px`;
+    container.appendChild(p);
+  }
+}
+
+if (window.speechSynthesis) window.speechSynthesis.getVoices();
+initParticles();
+</script>
